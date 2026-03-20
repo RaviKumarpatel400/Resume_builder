@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased text-slate-900 bg-white selection:bg-blue-600 selection:text-white;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  /* Clean white card with soft shadow */
+  .card-light {
+    @apply bg-white rounded-2xl border border-blue-100 shadow-sm transition-shadow hover:shadow-xl;
+  }
+  
+  /* Primary Action Button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0;
+  }
+  
+  /* Secondary / Ghost Action Button */
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-xl bg-white border border-blue-200 px-6 py-3 text-sm font-semibold text-slate-900 shadow-sm transition-all duration-200 hover:bg-blue-50 hover:border-blue-300;
+  }
+
+  /* Headings */
+  .heading-hero {
+    @apply text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900;
+  }
+  
+  .heading-section {
+    @apply text-3xl font-bold tracking-tight text-slate-900 relative inline-block;
+  }
+
+  .text-highlight {
+    @apply relative text-blue-600;
+  }
+}
+
+/* Custom Clean Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #bfdbfe;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #60a5fa;
+}
