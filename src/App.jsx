@@ -4,9 +4,22 @@ import LandingPage from './pages/LandingPage';
 import BuilderPage from './pages/BuilderPage';
 
 function App() {
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.hash = `/#`;
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  };
+
   return (
     <Router>
-      <div className="min-h-screen bg-background text-textMain">
+      <div className="min-h-screen bg-background text-slate-900">
         {/* Navigation Bar */}
         <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-blue-100 py-4 px-6 md:px-12 flex items-center justify-between">
           {/* Logo */}
@@ -16,10 +29,10 @@ function App() {
           </Link>
           
           {/* Center Links */}
-          <div className="hidden md:flex items-center gap-8 font-medium text-slate-600">
-            <Link to="#features" className="hover:text-blue-600 transition-colors">Features</Link>
-            <Link to="#how-it-works" className="hover:text-blue-600 transition-colors">How it Works</Link>
-            <Link to="/builder" className="hover:text-blue-600 transition-colors">Start</Link>
+          <div className="hidden md:flex items-center gap-8 font-medium text-slate-600 uppercase text-xs tracking-widest">
+            <button onClick={() => scrollToSection('features')} className="hover:text-blue-600 transition-colors uppercase">Features</button>
+            <button onClick={() => scrollToSection('how-it-works')} className="hover:text-blue-600 transition-colors uppercase">How it Works</button>
+            <Link to="/builder" className="hover:text-blue-600 transition-colors uppercase">Start</Link>
           </div>
           
           {/* Right Side Button */}

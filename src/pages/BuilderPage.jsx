@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Share2, Download, Printer, Plus, Trash2, ShieldAlert, BarChart } from 'lucide-react';
+import { Share2, Download, Printer, Plus, Trash2, ShieldAlert, BarChart, Check, Copy } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+
+const formatLastEdited = (date) => {
+  const datePart = date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+  const timePart = date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+  return `${datePart} – ${timePart}`;
+};
 
 export default function BuilderPage() {
   const [resumeData, setResumeData] = useState({
@@ -10,14 +26,73 @@ export default function BuilderPage() {
     summary: 'A passionate Full Stack Developer with 4 years of experience building scalable web applications. Dedicated to modern design principles and robust architectures.',
     education: [{ id: 1, degree: 'B.Sc. Computer Science', school: 'Tech University', year: '2022' }],
     experience: [{ id: 1, role: 'Frontend Engineer', company: 'Tech Solutions', duration: '2023 - Present' }],
-    skills: ['React', 'Node.js', 'Tailwind CSS']
+    skills: ['React', 'Node.js', 'Tailwind CSS'],
+    projects: [{ id: 1, title: 'AI Portfolio Builder', description: 'Built an automated resume generation platform using React.', role: 'Lead Developer' }],
+    certifications: [{ id: 1, name: 'AWS Certified Developer', issuer: 'Amazon Web Services', year: '2023' }],
+    achievements: [{ id: 1, title: 'Dean\'s List', details: 'Top 5% of the graduating class at Tech University.' }]
   });
 
   const [stats, setStats] = useState({ words: 0, characters: 0, lettersWithSpaces: 0, paragraphs: 0, readTime: 0 });
   const [warnings, setWarnings] = useState([]);
   const [skillWarning, setSkillWarning] = useState('');
   const [newSkill, setNewSkill] = useState('');
-  const [lastEdited, setLastEdited] = useState(new Date().toLocaleTimeString());
+  const [lastEdited, setLastEdited] = useState(formatLastEdited(new Date()));
+  const [isSharing, setIsSharing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('resume-preview');
+    if (!element) return;
+
+    try {
+      setIsDownloading(true);
+      const canvas = await html2canvas(element, {
+        scale: 2, // High resolution
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${resumeData.name.replace(/\s+/g, '_')}_Resume.pdf`);
+    } catch (error) {
+      console.error('PDF Generation Error:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    setIsSharing(true);
+    const shareUrl = window.location.href;
+    
+    // Attempt Web Share API first
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Resume of ${resumeData.name}`,
+          text: `Check out my resume built with Pro Resume Builder`,
+          url: shareUrl
+        });
+      } catch (err) {
+        console.log('Share canceled or failed');
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      navigator.clipboard.writeText(shareUrl);
+    }
+    
+    setTimeout(() => setIsSharing(false), 2000);
+  };
 
   // Analytical & Smart Features Effect
   useEffect(() => {
@@ -38,11 +113,14 @@ export default function BuilderPage() {
     resumeData.education.forEach(e => countText(e.degree + ' ' + e.school + ' ' + e.year));
     resumeData.experience.forEach(e => countText(e.role + ' ' + e.company + ' ' + e.duration));
     resumeData.skills.forEach(s => countText(s));
+    resumeData.projects.forEach(p => countText(p.title + ' ' + p.description + ' ' + p.role));
+    resumeData.certifications.forEach(c => countText(c.name + ' ' + c.issuer + ' ' + c.year));
+    resumeData.achievements.forEach(a => countText(a.title + ' ' + a.details));
 
     const readTime = Math.max(1, Math.ceil(wordCount / 200));
     setStats({ words: wordCount, characters: charCount, lettersWithSpaces: letterCountSpaces, paragraphs: paraCount, readTime });
 
-    setLastEdited(new Date().toLocaleTimeString());
+    setLastEdited(formatLastEdited(new Date()));
 
     // Word count warning
     if (wordCount > 700) {
@@ -111,9 +189,30 @@ export default function BuilderPage() {
                Last Edited: <span className="text-slate-900">{lastEdited}</span>
              </div>
              <div className="flex gap-2">
-                <button className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors border border-blue-200" title="Download PDF"><Download className="w-4 h-4" /></button>
-                <button className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors border border-blue-200" title="Print"><Printer className="w-4 h-4" /></button>
-                <button className="p-2 bg-blue-100 text-blue-800 hover:bg-blue-200 rounded-lg transition-colors border border-blue-300 shadow-sm" title="Share"><Share2 className="w-4 h-4" /></button>
+                <button 
+                  onClick={handleDownloadPDF} 
+                  disabled={isDownloading}
+                  className={`p-2 rounded-lg transition-all border border-blue-200 flex items-center justify-center ${isDownloading ? 'bg-blue-200 cursor-not-allowed' : 'bg-blue-50 hover:bg-blue-100 text-blue-700'}`} 
+                  title="Download PDF"
+                >
+                  <Download className={`w-4 h-4 ${isDownloading ? 'animate-bounce' : ''}`} />
+                </button>
+                
+                <button 
+                   onClick={handlePrint}
+                   className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors border border-blue-200" 
+                   title="Print"
+                >
+                   <Printer className="w-4 h-4" />
+                </button>
+                
+                <button 
+                   onClick={handleShare}
+                   className={`p-2 rounded-lg transition-all border border-blue-300 shadow-sm flex items-center justify-center ${isSharing ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`} 
+                   title="Share Session"
+                >
+                   {isSharing ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                </button>
              </div>
           </div>
 
@@ -244,6 +343,66 @@ export default function BuilderPage() {
                )}
              </section>
 
+             {/* Projects */}
+             <section>
+               <div className="flex justify-between items-center border-b border-blue-200 pb-2 mb-4">
+                  <h3 className="text-lg font-bold text-slate-900 font-bold">Projects</h3>
+                  <button onClick={() => addItem('projects', { title: 'Project Title', description: 'Briefly describe your project...', role: 'Lead Developer' })} className="text-blue-600 hover:bg-blue-100 p-1 rounded-md transition-colors"><Plus className="w-5 h-5"/></button>
+               </div>
+               <div className="space-y-4">
+                  {resumeData.projects.map((proj, i) => (
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} key={proj.id} className="p-4 bg-blue-50 rounded-xl border border-blue-200 relative group">
+                        <button onClick={() => removeItem('projects', i)} className="absolute top-3 right-3 text-slate-500 hover:text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors opacity-0 group-hover:opacity-100">
+                           <Trash2 className="w-4 h-4"/>
+                        </button>
+                        <input value={proj.title} onChange={(e) => handleArrayChange('projects', i, 'title', e.target.value)} className="w-full bg-transparent border-b-2 border-transparent hover:border-blue-300 focus:border-blue-600 outline-none text-slate-900 font-bold mb-3 pb-1 transition-all" placeholder="Project Name"/>
+                        <textarea value={proj.description} onChange={(e) => handleArrayChange('projects', i, 'description', e.target.value)} className="w-full bg-white rounded-md px-3 py-2 outline-none border border-blue-200 focus:border-blue-500 text-slate-800 font-medium shadow-sm placeholder:text-slate-400 text-sm mb-3 h-20 resize-none" placeholder="Description"/>
+                        <input value={proj.role} onChange={(e) => handleArrayChange('projects', i, 'role', e.target.value)} className="w-full bg-white rounded-md px-3 py-2 outline-none border border-blue-200 focus:border-blue-500 text-slate-800 font-medium shadow-sm placeholder:text-slate-400 text-sm" placeholder="Your Role"/>
+                    </motion.div>
+                  ))}
+               </div>
+             </section>
+
+             {/* Certifications */}
+             <section>
+               <div className="flex justify-between items-center border-b border-blue-200 pb-2 mb-4">
+                  <h3 className="text-lg font-bold text-slate-900 font-bold">Certifications</h3>
+                  <button onClick={() => addItem('certifications', { name: 'Certification Name', issuer: 'Issuer', year: 'Year' })} className="text-blue-600 hover:bg-blue-100 p-1 rounded-md transition-colors"><Plus className="w-5 h-5"/></button>
+               </div>
+               <div className="space-y-4">
+                  {resumeData.certifications.map((cert, i) => (
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} key={cert.id} className="p-4 bg-blue-50 rounded-xl border border-blue-200 relative group">
+                        <button onClick={() => removeItem('certifications', i)} className="absolute top-3 right-3 text-slate-500 hover:text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors opacity-0 group-hover:opacity-100">
+                           <Trash2 className="w-4 h-4"/>
+                        </button>
+                        <input value={cert.name} onChange={(e) => handleArrayChange('certifications', i, 'name', e.target.value)} className="w-full bg-transparent border-b-2 border-transparent hover:border-blue-300 focus:border-blue-600 outline-none text-slate-900 font-bold mb-3 pb-1 transition-all" placeholder="Certification Name"/>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                           <input value={cert.issuer} onChange={(e) => handleArrayChange('certifications', i, 'issuer', e.target.value)} className="w-full bg-white rounded-md px-3 py-2 outline-none border border-blue-200 focus:border-blue-500 text-slate-800 font-medium shadow-sm placeholder:text-slate-400" placeholder="Issuer"/>
+                           <input value={cert.year} onChange={(e) => handleArrayChange('certifications', i, 'year', e.target.value)} className="w-full bg-white rounded-md px-3 py-2 outline-none border border-blue-200 focus:border-blue-500 text-slate-800 font-medium shadow-sm placeholder:text-slate-400" placeholder="Year"/>
+                        </div>
+                    </motion.div>
+                  ))}
+               </div>
+             </section>
+
+             {/* Achievements */}
+             <section>
+               <div className="flex justify-between items-center border-b border-blue-200 pb-2 mb-4">
+                  <h3 className="text-lg font-bold text-slate-900 font-bold">Achievements</h3>
+                  <button onClick={() => addItem('achievements', { title: 'Achievement Title', details: 'Details...' })} className="text-blue-600 hover:bg-blue-100 p-1 rounded-md transition-colors"><Plus className="w-5 h-5"/></button>
+               </div>
+               <div className="space-y-4">
+                  {resumeData.achievements.map((ach, i) => (
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} key={ach.id} className="p-4 bg-blue-50 rounded-xl border border-blue-200 relative group">
+                        <button onClick={() => removeItem('achievements', i)} className="absolute top-3 right-3 text-slate-500 hover:text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors opacity-0 group-hover:opacity-100">
+                           <Trash2 className="w-4 h-4"/>
+                        </button>
+                        <input value={ach.title} onChange={(e) => handleArrayChange('achievements', i, 'title', e.target.value)} className="w-full bg-transparent border-b-2 border-transparent hover:border-blue-300 focus:border-blue-600 outline-none text-slate-900 font-bold mb-3 pb-1 transition-all" placeholder="Achievement Name"/>
+                        <textarea value={ach.details} onChange={(e) => handleArrayChange('achievements', i, 'details', e.target.value)} className="w-full bg-white rounded-md px-3 py-2 outline-none border border-blue-200 focus:border-blue-500 text-slate-800 font-medium shadow-sm placeholder:text-slate-400 text-sm h-16 resize-none" placeholder="Details..."/>
+                    </motion.div>
+                  ))}
+               </div>
+             </section>
           </div>
        </div>
 
@@ -253,9 +412,9 @@ export default function BuilderPage() {
              {/* A4 Content Container */}
              <div className="p-10 text-slate-900 h-full w-full font-sans print:p-0 print:m-0" id="resume-preview">
                 {/* Header Section */}
-                <div className="border-b-2 border-slate-900 pb-5 mb-5">
+                <div className="border-b-2 border-slate-900 pb-5 mb-5 text-center">
                    <h1 className="text-4xl font-black text-black tracking-tight leading-none mb-3 uppercase">{resumeData.name || 'Your Name'}</h1>
-                   <div className="flex flex-wrap items-center gap-3 text-sm font-bold text-slate-700">
+                   <div className="flex flex-wrap items-center justify-center gap-3 text-sm font-bold text-slate-700">
                       {resumeData.email && <span>{resumeData.email}</span>}
                       {resumeData.email && resumeData.phone && <span className="text-blue-300">|</span>}
                       {resumeData.phone && <span>{resumeData.phone}</span>}
@@ -305,6 +464,57 @@ export default function BuilderPage() {
                    </div>
                 )}
 
+                {/* Projects Detail */}
+                 {(resumeData.projects.length > 0) && (
+                    <div className="mb-6">
+                       <h2 className="text-[16px] font-black uppercase tracking-wider text-black mb-3 border-b border-blue-200 pb-1">Projects</h2>
+                       <div className="space-y-4">
+                          {resumeData.projects.map((proj, i) => (
+                             <div key={i}>
+                                <div className="flex justify-between items-baseline mb-1">
+                                   <h3 className="font-bold text-slate-950">{proj.title}</h3>
+                                   <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-wider">{proj.role}</span>
+                                </div>
+                                <p className="text-[13px] text-slate-700 font-medium leading-relaxed">{proj.description}</p>
+                             </div>
+                          ))}
+                       </div>
+                    </div>
+                 )}
+
+                 {/* Certifications Detail */}
+                 {(resumeData.certifications.length > 0) && (
+                    <div className="mb-6">
+                       <h2 className="text-[16px] font-black uppercase tracking-wider text-black mb-3 border-b border-blue-200 pb-1">Certifications</h2>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                          {resumeData.certifications.map((cert, i) => (
+                             <div key={i} className="flex justify-between items-start">
+                                <div>
+                                   <h4 className="text-[14px] font-bold text-slate-900 leading-tight">{cert.name}</h4>
+                                   <span className="text-[12px] text-slate-600 font-semibold">{cert.issuer}</span>
+                                </div>
+                                <span className="text-xs font-bold text-slate-500 uppercase">{cert.year}</span>
+                             </div>
+                          ))}
+                       </div>
+                    </div>
+                 )}
+
+                 {/* Achievements */}
+                 {(resumeData.achievements.length > 0) && (
+                    <div className="mb-6">
+                       <h2 className="text-[16px] font-black uppercase tracking-wider text-black mb-3 border-b border-blue-200 pb-1">Achievements</h2>
+                       <ul className="list-disc list-inside space-y-2">
+                          {resumeData.achievements.map((ach, i) => (
+                             <li key={i} className="text-[13px] text-slate-800 font-medium leading-relaxed marker:text-blue-500">
+                                <span className="font-bold text-slate-950">{ach.title}: </span>
+                                {ach.details}
+                             </li>
+                          ))}
+                       </ul>
+                    </div>
+                 )}
+
                 {/* Skills Summary */}
                 {(resumeData.skills.length > 0) && (
                    <div>
@@ -319,6 +529,9 @@ export default function BuilderPage() {
                    </div>
                 )}
 
+                <div className="mt-8 pt-8 border-t border-slate-100 text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+                    Generated by Pro Resume Builder • Secure Session #{Math.floor(Math.random() * 900000) + 100000}
+                 </div>
              </div>
           </div>
        </div>

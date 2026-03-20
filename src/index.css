@@ -53,3 +53,45 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #60a5fa;
 }
+
+/* Print Styles: Ensures only the resume canvas prints clearly */
+@media print {
+  /* Only display the resume canvas container */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  nav, footer, .lg\:w-\[500px\], .card-light, button, aside, .absolute, .sticky {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  .flex-1 {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #resume-preview {
+    margin: 0 !important;
+    padding: 10mm !important; /* Standard print margin */
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+  }
+
+  .shadow-xl, .border-blue-200, .aspect-\[1\/1\.414\], .rounded {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+}
