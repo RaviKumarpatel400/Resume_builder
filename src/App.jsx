@@ -36,9 +36,9 @@ function App() {
           </div>
           
           {/* Right Side Button */}
-          <div>
-            <Link to="/builder" className="btn-primary py-2 px-5">
-              Start Building
+          <div className="flex shrink-0">
+            <Link to="/builder" className="btn-primary py-2 px-3 sm:px-5 text-sm sm:text-base whitespace-nowrap">
+              Start <span className="hidden sm:inline">Building</span>
             </Link>
           </div>
         </nav>

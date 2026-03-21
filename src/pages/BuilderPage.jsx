@@ -21,6 +21,7 @@ const formatLastEdited = (date) => {
 export default function BuilderPage() {
   const [resumeData, setResumeData] = useState({
     name: 'Alex Johnson',
+    dob: '1995-05-15',
     email: 'alex.j@example.com',
     phone: '+1 (555) 123-4567',
     summary: 'A passionate Full Stack Developer with 4 years of experience building scalable web applications. Dedicated to modern design principles and robust architectures.',
@@ -32,6 +33,9 @@ export default function BuilderPage() {
     achievements: [{ id: 1, title: 'Dean\'s List', details: 'Top 5% of the graduating class at Tech University.' }]
   });
 
+  const [pdfPassword, setPdfPassword] = useState('');
+  const [showPasswordAlert, setShowPasswordAlert] = useState(false);
+
   const [stats, setStats] = useState({ words: 0, characters: 0, lettersWithSpaces: 0, paragraphs: 0, readTime: 0 });
   const [warnings, setWarnings] = useState([]);
   const [skillWarning, setSkillWarning] = useState('');
@@ -39,6 +43,7 @@ export default function BuilderPage() {
   const [lastEdited, setLastEdited] = useState(formatLastEdited(new Date()));
   const [isSharing, setIsSharing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [viewMode, setViewMode] = useState('edit'); // 'edit' or 'preview' for mobile responsiveness
 
   const handlePrint = () => {
     window.print();
@@ -58,12 +63,30 @@ export default function BuilderPage() {
       });
       
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const password = `${resumeData.name.replace(/\s+/g, '')}-${resumeData.dob}`;
+      
+      // Initialize jsPDF with encryption options
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+        encryption: {
+          userPassword: password,
+          ownerPassword: password,
+          userPermissions: ['print', 'modify', 'copy', 'annot-forms']
+        }
+      });
+      
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${resumeData.name.replace(/\s+/g, '_')}_Resume.pdf`);
+      
+      // Show password to user
+      setPdfPassword(password);
+      setShowPasswordAlert(true);
     } catch (error) {
       console.error('PDF Generation Error:', error);
     } finally {
@@ -180,9 +203,26 @@ export default function BuilderPage() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 max-w-[1600px] mx-auto min-h-[85vh] px-4 py-8 bg-white">
-       {/* Sidebar Configuration Panel */}
-       <div className="w-full lg:w-[500px] space-y-6 overflow-y-auto pr-2 custom-scrollbar">
+    <div className="flex flex-col gap-4 max-w-[1600px] mx-auto min-h-[85vh] px-2 sm:px-4 py-4 sm:py-8 bg-white overflow-x-hidden">
+       {/* Mobile Tab Switcher */}
+       <div className="lg:hidden flex p-1 bg-slate-100 rounded-xl mb-4 sticky top-20 z-40 mx-2 shadow-sm border border-slate-200">
+          <button 
+             onClick={() => setViewMode('edit')}
+             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-bold text-sm transition-all ${viewMode === 'edit' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:bg-white/50'}`}
+          >
+             <PenTool className="w-4 h-4" /> Edit
+          </button>
+          <button 
+             onClick={() => setViewMode('preview')}
+             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-bold text-sm transition-all ${viewMode === 'preview' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:bg-white/50'}`}
+          >
+             <Eye className="w-4 h-4" /> Preview
+          </button>
+       </div>
+
+       <div className="flex flex-col lg:flex-row gap-8 w-full">
+          {/* Sidebar Configuration Panel */}
+          <div className={`w-full lg:w-[500px] space-y-6 lg:overflow-y-auto lg:pr-2 lg:h-[calc(100vh-140px)] custom-scrollbar ${viewMode === 'edit' ? 'block' : 'hidden lg:block'}`}>
           
           <div className="card-light px-6 py-4 flex items-center justify-between sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-blue-200">
              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
@@ -269,7 +309,11 @@ export default function BuilderPage() {
                   <div className="grid grid-cols-2 gap-4">
                      <input type="email" name="email" value={resumeData.email} onChange={handleChange} className="w-full bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-500" placeholder="Email" />
                      <input type="text" name="phone" value={resumeData.phone} onChange={handleChange} className="w-full bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-500" placeholder="Phone" />
-                  </div>
+                   </div>
+                   <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500 uppercase ml-1">Date of Birth (For PDF Password)</label>
+                      <input type="date" name="dob" value={resumeData.dob} onChange={handleChange} className="w-full bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" />
+                   </div>
                   <textarea name="summary" value={resumeData.summary} onChange={handleChange} className="w-full bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none h-28 custom-scrollbar placeholder:text-slate-500" placeholder="Professional Summary"></textarea>
                </div>
              </section>
@@ -407,8 +451,8 @@ export default function BuilderPage() {
        </div>
 
        {/* Realtime Canvas Preview (A4 Aspect Ratio) */}
-       <div className="flex-1 flex justify-center sticky top-28 h-[calc(100vh-140px)] bg-white">
-          <div className="w-full max-w-[800px] aspect-[1/1.414] bg-white rounded border border-blue-200 shadow-xl overflow-hidden relative overflow-y-auto print:border-none print:shadow-none custom-scrollbar">
+       <div className={`flex-1 flex justify-center lg:sticky lg:top-28 lg:h-[calc(100vh-140px)] bg-white ${viewMode === 'preview' ? 'block' : 'hidden lg:flex'}`}>
+          <div className="w-full max-w-[800px] aspect-[1/1.414] bg-white rounded border border-blue-200 shadow-xl overflow-hidden relative overflow-y-auto print:border-none print:shadow-none custom-scrollbar pb-10">
              {/* A4 Content Container */}
              <div className="p-10 text-slate-900 h-full w-full font-sans print:p-0 print:m-0" id="resume-preview">
                 {/* Header Section */}
@@ -535,6 +579,50 @@ export default function BuilderPage() {
              </div>
           </div>
        </div>
+    </div>
+       
+       {/* Password Notification Modal */}
+       {showPasswordAlert && (
+         <motion.div 
+           initial={{ opacity: 0 }} 
+           animate={{ opacity: 1 }} 
+           className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+         >
+           <motion.div 
+             initial={{ scale: 0.9, y: 20 }} 
+             animate={{ scale: 1, y: 0 }} 
+             className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-blue-100 flex flex-col items-center text-center"
+           >
+             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                <ShieldAlert className="w-8 h-8 text-blue-600" />
+             </div>
+             <h2 className="text-2xl font-black text-slate-900 mb-2">PDF Password Protected</h2>
+             <p className="text-slate-600 mb-6 font-medium">Your resume has been generated with a password for security.</p>
+             
+             <div className="w-full bg-blue-50 border-2 border-dashed border-blue-200 rounded-xl p-4 mb-6 relative group">
+                <span className="text-xs font-bold text-blue-600 uppercase tracking-widest block mb-1">Your Password:</span>
+                <code className="text-xl font-black text-blue-900 tracking-wider break-all">{pdfPassword}</code>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(pdfPassword);
+                  }}
+                  className="absolute top-2 right-2 p-1.5 hover:bg-blue-100 rounded-lg transition-colors text-blue-400 hover:text-blue-600"
+                  title="Copy Password"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+             </div>
+
+             <button 
+               onClick={() => setShowPasswordAlert(false)}
+               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2"
+             >
+               <Check className="w-5 h-5" /> Got it, thanks!
+             </button>
+             <p className="mt-4 text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Format: FullName (no spaces) + Date of Birth</p>
+           </motion.div>
+         </motion.div>
+       )}
     </div>
   );
 }

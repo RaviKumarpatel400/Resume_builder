@@ -98,9 +98,9 @@ const LandingPage = () => {
               <span>The Future of Resume Building</span>
             </motion.div>
 
-            <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl font-black text-slate-900 leading-[1.05] tracking-tight">
+            <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-7xl font-black text-slate-900 leading-[1.1] sm:leading-[1.05] tracking-tight">
               Hire-Ready <br />
-              <span className="text-blue-600">Resumes.</span> <br />
+              <span className="text-blue-600">Resumes.</span> <br className="hidden sm:block" />
               Instant Results.
             </motion.h1>
 
@@ -137,7 +137,7 @@ const LandingPage = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="relative aspect-square md:aspect-video lg:aspect-[4/3] rounded-3xl overflow-hidden border-8 border-white shadow-2xl bg-blue-50"
+            className="relative aspect-square sm:aspect-video lg:aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden border-4 sm:border-8 border-white shadow-2xl bg-blue-50"
           >
             <AnimatePresence mode='wait'>
               <motion.img
@@ -273,9 +273,9 @@ const LandingPage = () => {
       {/* Professional Footer */}
       <footer className="bg-slate-900 text-white pt-24 pb-12">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16 items-center md:items-start text-center md:text-left">
             {/* Brand Col */}
-            <div className="space-y-6">
+            <div className="space-y-6 flex flex-col items-center md:items-start">
               <div className="text-2xl font-black flex items-center gap-2 font-bold">
                 <span className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">R</span>
                 Resume Builder
@@ -291,7 +291,7 @@ const LandingPage = () => {
             </div>
 
             {/* Product Col */}
-            <div>
+            <div className="flex flex-col items-center md:items-start">
               <h4 className="text-sm font-black uppercase tracking-widest text-blue-500 mb-6 font-bold">Product</h4>
               <ul className="space-y-4 text-sm font-medium text-slate-400 font-bold">
                 <li><Link to="/builder" className="hover:text-white transition-colors">Resume Engine</Link></li>
@@ -302,7 +302,7 @@ const LandingPage = () => {
             </div>
 
             {/* Support Col */}
-            <div>
+            <div className="flex flex-col items-center md:items-start">
               <h4 className="text-sm font-black uppercase tracking-widest text-blue-500 mb-6 font-bold">Resources</h4>
               <ul className="space-y-4 text-sm font-medium text-slate-400 font-bold">
                 <li><Link to="#" className="hover:text-white transition-colors">Documentation</Link></li>
@@ -315,17 +315,17 @@ const LandingPage = () => {
             {/* Contact Col */}
             <div>
               <h4 className="text-sm font-black uppercase tracking-widest text-blue-500 mb-6 font-bold">Get in Touch</h4>
-              <ul className="space-y-4 text-sm font-medium text-slate-400 font-bold">
+              <ul className="space-y-4 text-sm font-medium text-slate-400 font-bold flex flex-col items-center md:items-start">
                 <li className="flex items-center gap-3"><Mail className="w-4 h-4 text-blue-600" /> hello@resumebuilder.com</li>
                 <li className="flex items-center gap-3"><Phone className="w-4 h-4 text-blue-600" /> +1 (800) RESUME-ME</li>
-                <li className="flex items-center gap-3"><MapPin className="w-4 h-4 text-blue-600" /> Innovation Drive, Tech Valley</li>
+                <li className="flex items-center gap-3 text-center md:text-left"><MapPin className="w-4 h-4 text-blue-600" /> Innovation Drive, Tech Valley</li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+          <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest text-center">
             <p>© {new Date().getFullYear()} Professional Resume Builder. All Rights Reserved.</p>
-            <div className="flex gap-8">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
               <Link to="#" className="hover:text-white transition-colors">License</Link>
               <Link to="#" className="hover:text-white transition-colors">Changelog</Link>
               <Link to="#" className="hover:text-white transition-colors">Cookies</Link>
