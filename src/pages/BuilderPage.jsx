@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Share2, Download, Printer, Plus, Trash2, ShieldAlert, BarChart, Check, Copy } from 'lucide-react';
+import { Share2, Download, Printer, Plus, Trash2, ShieldAlert, BarChart, Check, Copy, PenTool, Eye } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
