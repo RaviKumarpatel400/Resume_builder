@@ -44,7 +44,7 @@ function App() {
         </nav>
 
         {/* Main Content */}
-        <main className="pt-24 pb-12">
+        <main className="pt-16 sm:pt-20 lg:pt-24 pb-8 sm:pb-12">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/builder" element={<BuilderPage />} />

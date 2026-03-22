@@ -84,7 +84,7 @@ const LandingPage = () => {
       <div className="absolute inset-0 bg-[radial-gradient(#bfdbfe_1px,transparent_1px)] [background-size:32px_32px] opacity-40 z-0"></div>
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-32 pb-20 px-6 md:px-12 max-w-7xl mx-auto">
+      <section className="relative z-10 pt-10 lg:pt-16 pb-12 lg:pb-16 px-6 md:px-12 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Left Content */}
           <motion.div
@@ -156,7 +156,7 @@ const LandingPage = () => {
       </section>
 
       {/* "What" Section - Value Proposition */}
-      <section id="what" className="py-32 relative z-10 bg-slate-50/50">
+      <section id="what" className="py-16 lg:py-20 relative z-10 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
           <span className="text-sm font-bold text-blue-600 tracking-wider uppercase mb-2 block">Our Philosophy</span>
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 font-bold">What is the Resume Builder?</h2>
@@ -182,7 +182,7 @@ const LandingPage = () => {
       </section>
 
       {/* Structured Features Grid */}
-      <section id="features" className="py-32 relative z-10 max-w-7xl mx-auto px-6 md:px-12">
+      <section id="features" className="py-16 lg:py-20 relative z-10 max-w-7xl mx-auto px-6 md:px-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="text-left">
             <span className="text-sm font-bold text-blue-600 tracking-wider uppercase mb-2 block">System Capabilities</span>
@@ -191,37 +191,37 @@ const LandingPage = () => {
           <p className="text-slate-700 font-medium max-w-sm leading-relaxed">Reimagined structure offering unparalleled validation and high-fidelity sharing.</p>
         </div>
 
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-           {features.map((feature, idx) => (
-             <motion.div 
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="relative p-10 bg-white border border-blue-100 rounded-[2rem] shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group overflow-hidden"
-             >
-                {/* Numeric ID */}
-                <div className="absolute top-8 right-8 text-4xl font-black text-blue-50/50 group-hover:text-blue-100/50 transition-colors duration-500">
-                   {String(idx + 1).padStart(2, '0')}
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.4, delay: idx * 0.1 }}
+              className="relative p-10 bg-white border border-blue-100 rounded-[2rem] shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group overflow-hidden"
+            >
+              {/* Numeric ID */}
+              <div className="absolute top-8 right-8 text-4xl font-black text-blue-50/50 group-hover:text-blue-100/50 transition-colors duration-500">
+                {String(idx + 1).padStart(2, '0')}
+              </div>
 
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 shadow-inner ${feature.color} group-hover:scale-110 transition-transform duration-500`}>
-                   {feature.icon}
-                </div>
-                
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight font-bold mb-4">{feature.title}</h3>
-                <p className="text-slate-600 font-medium text-base leading-relaxed">{feature.description}</p>
-                
-                {/* Subtle bottom bar on hover */}
-                <div className="absolute bottom-0 left-0 w-full h-1.5 bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-             </motion.div>
-           ))}
-         </div>
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 shadow-inner ${feature.color} group-hover:scale-110 transition-transform duration-500`}>
+                {feature.icon}
+              </div>
+
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight font-bold mb-4">{feature.title}</h3>
+              <p className="text-slate-600 font-medium text-base leading-relaxed">{feature.description}</p>
+
+              {/* Subtle bottom bar on hover */}
+              <div className="absolute bottom-0 left-0 w-full h-1.5 bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* How it Works Section */}
-      <section id="how-it-works" className="py-32 relative z-10 max-w-6xl mx-auto px-6 md:px-12 border-t border-blue-100">
+      <section id="how-it-works" className="py-16 lg:py-20 relative z-10 max-w-6xl mx-auto px-6 md:px-12 border-t border-blue-100">
         <div className="text-center mb-20 text-center">
           <span className="text-sm font-bold text-blue-600 tracking-wider uppercase mb-2 block text-center">The Process</span>
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 text-center font-bold">Mastery in Three Steps</h2>
