@@ -59,72 +59,93 @@ export default function BuilderPage() {
    };
 
    const handleDownloadPDF = async () => {
-      const originalViewMode = viewMode;
       const element = document.getElementById('resume-preview');
-
       if (!element) return;
+
+      const originalViewMode = viewMode;
+      const originalStyle = element.getAttribute('style') || '';
 
       try {
          setIsDownloading(true);
-
-         // On mobile, show the element clearly for a moment
+         
+         // 1. Mobile Visibility Check
          if (originalViewMode !== 'preview' && window.innerWidth < 1024) {
             setViewMode('preview');
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise(resolve => setTimeout(resolve, 500));
          }
 
-         // Capture with a fixed width to ensure "Resume Format" (A4)
-         // 794px is roughly A4 width at 96 DPI
+         // 2. Scroll Resets (Crucial for html2canvas stability)
+         const originalScrollTop = element.scrollTop;
+         element.scrollTop = 0;
+         window.scrollTo(0, 0);
+
+         // 3. Force Width via Style (More stable than html2canvas options)
+         // We force 794px only during capture to ensure A4 layout
+         element.style.width = '794px';
+         element.style.maxWidth = 'none';
+
+         await new Promise(resolve => setTimeout(resolve, 300));
+
+         // 4. Capture
          const canvas = await html2canvas(element, {
             scale: 2,
             useCORS: true,
-            width: 794,
-            windowWidth: 794,
-            backgroundColor: '#ffffff'
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: false,
          });
+
+         // 5. Cleanup Styles & Scrolls
+         element.setAttribute('style', originalStyle);
+         element.scrollTop = originalScrollTop;
 
          const imgData = canvas.toDataURL('image/png');
-         const password = `${resumeData.name.replace(/\s+/g, '')}-${resumeData.dob}`;
+         const password = `${resumeData.name.replace(/\s+/g, '')}-${resumeData.dob || '2024'}`;
 
-         const pdf = new jsPDF({
-            orientation: 'p',
-            unit: 'mm',
-            format: 'a4',
-            encryption: {
-               userPassword: password,
-               ownerPassword: password,
-               userPermissions: ['print', 'modify', 'copy', 'annot-forms']
-            }
-         });
+         // 6. Generate PDF with Encryption Fallback
+         let pdf;
+         try {
+            // Attempt encrypted PDF
+            pdf = new jsPDF({
+               orientation: 'p',
+               unit: 'mm',
+               format: 'a4',
+               encryption: {
+                  userPassword: password,
+                  ownerPassword: password,
+                  userPermissions: ['print', 'modify', 'copy', 'annot-forms']
+               }
+            });
+         } catch (encErr) {
+            console.warn('Encryption plugin missing or failed, creating standard PDF:', encErr);
+            // Fallback to standard PDF
+            pdf = new jsPDF({
+               orientation: 'p',
+               unit: 'mm',
+               format: 'a4'
+            });
+         }
 
          const pdfWidth = pdf.internal.pageSize.getWidth();
-         const pdfHeight = pdf.internal.pageSize.getHeight();
-
-         // Calculate dimensions to fit the A4 page
          const imgWidth = pdfWidth;
          const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-         // If content is longer than one page, jsPDF can split it, 
-         // but for a single-page resume we'll scale it to fit or add a second page
-         if (imgHeight > pdfHeight) {
-            // Multi-page support or scaling
-            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-         } else {
-            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-         }
-
+         pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
          pdf.save(`${resumeData.name.replace(/\s+/g, '_')}_Resume.pdf`);
 
          setPdfPassword(password);
          setShowPasswordAlert(true);
 
-         if (originalViewMode !== 'preview' && window.innerWidth < 1024) {
-            setViewMode(originalViewMode);
-         }
       } catch (error) {
          console.error('PDF Generation Error:', error);
+         alert('Failed to generate PDF. Please try again or use the Print function.');
+         // Cleanup on error
+         element.setAttribute('style', originalStyle);
       } finally {
          setIsDownloading(false);
+         if (window.innerWidth < 1024) {
+            setViewMode(originalViewMode);
+         }
       }
    };
 
